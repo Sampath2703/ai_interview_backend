@@ -19,6 +19,10 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
+@app.get("/")
+def home():
+    return {"message": "Backend Running Successfully"}
+
 @app.post("/generate")
 async def generate(req: Request):
     data = await req.json()
