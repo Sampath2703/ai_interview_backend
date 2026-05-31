@@ -1,48 +1,39 @@
-from fastapi import FastAPI,Request 
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import requests
-import ast
 from openai import OpenAI
 import os
+import json
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # Change to frontend URL in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-
 client = OpenAI(
-    api_key = os.getenv("GROQ_API_KEY"),
+    api_key=os.getenv("GROQ_API_KEY"),
     base_url="https://api.groq.com/openai/v1"
 )
-@app.post("/generate")
 
-async def generate(req:Request):
+@app.post("/generate")
+async def generate(req: Request):
     data = await req.json()
-    p=data["prompt"]
+    prompt = data["prompt"]
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[
-            {
-                "role": "user",
-                "content": p
-            }
-        ]
+        messages=[{"role": "user", "content": prompt}]
     )
+
     answer = response.choices[0].message.content
-    return {
-        "object": answer
-    }
 
+    # 🔥 SAFE JSON EXTRACTION (IMPORTANT FIX)
+    start = answer.find("[")
+    end = answer.rfind("]") + 1
+    clean_answer = answer[start:end]
 
-
-
-    
+    return {"object": clean_answer}
