@@ -4,8 +4,17 @@ import requests
 import ast
 from openai import OpenAI
 
-
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # Change to frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 client = OpenAI(
     api_key = "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",
